@@ -157,5 +157,6 @@ const confidence = ref(70);
 
 .custom-slider-handle::before {
     background: #22c55e;
+    test
 }
 </style>
