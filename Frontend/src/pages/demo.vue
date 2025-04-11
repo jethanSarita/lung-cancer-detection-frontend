@@ -61,7 +61,7 @@ const confidence = ref(70);
 </script>
 
 <template>
-    <div class="h-screen flex justify-center">
+    <div class="flex justify-center">
         <div class="w-[75%] flex flex-col">
             <!-- Title -->
             <div class="pt-10">
