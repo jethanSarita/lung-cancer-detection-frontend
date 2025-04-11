@@ -3,6 +3,8 @@ import { ref } from 'vue';
 import { usePrimeVue } from 'primevue/config';
 import { useToast } from "primevue/usetoast";
 
+const model_chosen = ref('');
+
 const $primevue = usePrimeVue();
 const toast = useToast();
 
@@ -59,20 +61,15 @@ const confidence = ref(70);
 </script>
 
 <template>
-    <div class="h-screen flex justify-center">
-        <div class="w-[75%] flex flex-col justify-center items-center">
-            <p class="text-5xl font-bold text-surface-700 pt-5 pb-5">
+    <div class="h-screen flex justify-center pt-10">
+        <div class="w-[75%] flex flex-col">
+            <p class="text-5xl font-bold text-surface-700 pt-5 pb-5 text-center">
                 LungVision Demo
             </p>
-            <p class="text-xl text-surface-700 pt-5 pb-5 text-center">
+            <p class="text-xl text-surface-700 pt-5 pb-5 ">
                 Upload one or more lung CT scan images, and the app will detect potential cancerous regions.
             </p>
-            <p class="text-sm text-surface-600 text-center">Disclaimer: This model is not perfect and may produce false positives or false negatives. Please consult a medical professional for a thorough diagnosis.</p>
-            <!-- <div class="card flex flex-col gap-6 items-center justify-center pt-5 pb-5">
-                <Toast />
-                <FileUpload ref="fileupload" mode="basic" name="demo[]" url="/api/upload" accept="image/*" :maxFileSize="1000000" @upload="onUpload" />
-                <Button label="Upload" @click="upload" severity="secondary" />
-            </div> -->
+            <p class="text-sm text-surface-600 ">Disclaimer: This model is not perfect and may produce false positives or false negatives. Please consult a medical professional for a thorough diagnosis.</p>
             <div class="card w-full pt-5 pb-5">
                 <Toast />
                 <FileUpload name="demo[]" url="/api/upload" @upload="onTemplatedUpload($event)" :multiple="true" accept="image/*" :maxFileSize="1000000" @select="onSelectedFiles">
@@ -130,11 +127,24 @@ const confidence = ref(70);
                 </FileUpload>
             </div>
             <div class="w-full">
-                <p class="text-xl text-surface-700 pt-5 pb-5">Confidnce Threshold {{ confidence}}%</p>
-                <Slider v-model="confidence" class="w-full" />
+                <p class="text-xl text-surface-700 pt-5 pb-5">Confidnce Threshold <span class="text-primary-600">{{ confidence }}%</span></p>
+                <Slider v-model="confidence" class="w-full" pt:handle:class="before:bg-primary-500 bg-primary-500"/>
             </div>
-            <!-- Select Model -->
-            <!-- Radio Buttons -->
+            <p class="text-xl text-surface-700 pt-5 pb-5">Choose the YOLO Model for predictions</p>
+            <div class="flex flex-col gap-4 pb-5">
+                <div class="flex items-center gap-2">
+                    <RadioButton v-model="model_chosen" inputId="model_chosen1" name="model_chosen" value="YOLOv5mu (v0.0.2b)" pt:icon:class="bg-primary-500"/>
+                    <label for="model_chosen1">YOLOv5mu (v0.0.2b)</label>
+                </div>
+                <div class="flex items-center gap-2">
+                    <RadioButton v-model="model_chosen" inputId="model_chosen2" name="model_chosen" value="YOLOv5lu (v0.0.2c)" />
+                    <label for="model_chosen2">YOLOv5lu (v0.0.2c)</label>
+                </div>
+                <div class="flex items-center gap-2">
+                    <RadioButton v-model="model_chosen" inputId="model_chosen3" name="model_chosen" value="PlaceHolder" />
+                    <label for="model_chosen3">PlaceHolder</label>
+                </div>
+            </div>
             <!-- Scan Button -->
         </div>
     </div>
@@ -143,5 +153,9 @@ const confidence = ref(70);
 <style scoped>
 .p-slider {
     @apply bg-surface-400
+}
+
+.custom-slider-handle::before {
+    background: #22c55e;
 }
 </style>

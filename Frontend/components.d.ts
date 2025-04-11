@@ -15,6 +15,7 @@ declare module 'vue' {
     PoweredByJethan: typeof import('./src/components/PoweredByJethan.vue')['default']
     PoweredByVue: typeof import('./src/components/PoweredByVue.vue')['default']
     ProgressBar: typeof import('primevue/progressbar')['default']
+    RadioButton: typeof import('primevue/radiobutton')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Slider: typeof import('primevue/slider')['default']
