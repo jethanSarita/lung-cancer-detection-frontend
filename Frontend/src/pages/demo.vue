@@ -61,15 +61,20 @@ const confidence = ref(70);
 </script>
 
 <template>
-    <div class="h-screen flex justify-center pt-10">
+    <div class="h-screen flex justify-center">
         <div class="w-[75%] flex flex-col">
-            <p class="text-5xl font-bold text-surface-700 pt-5 pb-5 text-center">
+            <!-- Title -->
+            <div class="pt-10">
+                <p class="text-5xl font-bold text-surface-700 pb-5 text-center">
                 LungVision Demo
             </p>
+            </div>
+            <!-- Desc -->
             <p class="text-xl text-surface-700 pt-5 pb-5 ">
                 Upload one or more lung CT scan images, and the app will detect potential cancerous regions.
             </p>
             <p class="text-sm text-surface-600 ">Disclaimer: This model is not perfect and may produce false positives or false negatives. Please consult a medical professional for a thorough diagnosis.</p>
+            <!-- Upload Dialog -->
             <div class="card w-full pt-5 pb-5">
                 <Toast />
                 <FileUpload name="demo[]" url="/api/upload" @upload="onTemplatedUpload($event)" :multiple="true" accept="image/*" :maxFileSize="1000000" @select="onSelectedFiles">
@@ -126,14 +131,16 @@ const confidence = ref(70);
                     </template>
                 </FileUpload>
             </div>
+            <!-- Slider -->
             <div class="w-full">
                 <p class="text-xl text-surface-700 pt-5 pb-5">Confidnce Threshold <span class="text-primary-600">{{ confidence }}%</span></p>
                 <Slider v-model="confidence" class="w-full" pt:handle:class="before:bg-primary-500 bg-primary-500"/>
             </div>
+            <!-- Radio Buttons -->
             <p class="text-xl text-surface-700 pt-5 pb-5">Choose the YOLO Model for predictions</p>
-            <div class="flex flex-col gap-4 pb-5">
+            <div class="flex flex-col gap-4 pb-5 text-surface-700">
                 <div class="flex items-center gap-2">
-                    <RadioButton v-model="model_chosen" inputId="model_chosen1" name="model_chosen" value="YOLOv5mu (v0.0.2b)" pt:icon:class="bg-primary-500"/>
+                    <RadioButton v-model="model_chosen" inputId="model_chosen1" name="model_chosen" value="YOLOv5mu (v0.0.2b)"/>
                     <label for="model_chosen1">YOLOv5mu (v0.0.2b)</label>
                 </div>
                 <div class="flex items-center gap-2">
@@ -146,6 +153,9 @@ const confidence = ref(70);
                 </div>
             </div>
             <!-- Scan Button -->
+            <div class="flex justify-center pb-10">
+                <Button label="Scan" class="p-2 w-32"/>
+            </div>
         </div>
     </div>
 </template>
@@ -157,6 +167,5 @@ const confidence = ref(70);
 
 .custom-slider-handle::before {
     background: #22c55e;
-    test
 }
 </style>

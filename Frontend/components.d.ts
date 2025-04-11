@@ -19,6 +19,7 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Slider: typeof import('primevue/slider')['default']
+    TeamImage: typeof import('./src/components/TeamImage.vue')['default']
     Toast: typeof import('primevue/toast')['default']
   }
 }
