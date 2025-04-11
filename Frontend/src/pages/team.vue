@@ -5,7 +5,7 @@ import TeamImage from '@/components/TeamImage.vue';
 </script>
 
 <template>
-    <div class="flex justify-center">
+    <div class="h-screen flex flex-row justify-center">
         <div class="w-[75%] flex flex-col justify-center">
             <!-- 2:3 -->
             <div>

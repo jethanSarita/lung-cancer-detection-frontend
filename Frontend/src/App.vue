@@ -5,7 +5,7 @@
     </div>
     <div class="h-screen w-[70%] bg-red-100 overflow-auto">
       <router-view v-slot="{ Component }">
-        <transition name="fade">
+        <transition name="fade" mode="out-in">
           <component :is="Component" />
         </transition>
       </router-view>
