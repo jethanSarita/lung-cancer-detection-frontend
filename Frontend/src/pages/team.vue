@@ -5,19 +5,22 @@ import TeamImage from '@/components/TeamImage.vue';
 </script>
 
 <template>
-    <div class="h-screen flex flex-row justify-center">
-        <div class="w-[75%] flex flex-col justify-center">
+    <div class="flex flex-row justify-center">
+        <div class="w-[90%] flex flex-col justify-center">
             <!-- 2:3 -->
-            <div>
-                <p class="text-5xl font-bold text-surface-700 pb-5 text-center">
+            <div class="pt-10 pb-10">
+                <p class="text-3xl text-surface-700 text-center pb-5">
+                    Meet
+                </p>
+                <p class="text-5xl font-bold text-surface-700 text-center">
                     The Team
                 </p>
             </div>
             <!-- Images -->
-            <div class="flex flex-row justify-center gap-5">
-                <TeamImage image="Jethan.jpg" name="Jethañ Sarita"/>
-                <TeamImage image="Franco.jpg" name="Franco Pleños"/>
-                <TeamImage image="Jeno.jpg" name="Jeño Flores"/>
+            <div class="flex flex-row justify-center gap-5 pb-10">
+                <TeamImage image="Jethan.jpg" name="Jethañ Sarita" subtext="Software Engineer"/>
+                <TeamImage image="Franco.jpg" name="Franco Pleños" subtext="Lead Researcher"/>
+                <TeamImage image="Jeno.jpg" name="Jeño Flores" subtext="AI Engineer"/>
             </div>
         </div>
     </div>
