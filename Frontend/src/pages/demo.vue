@@ -3,18 +3,36 @@ import { ref } from 'vue';
 import { usePrimeVue } from 'primevue/config';
 import { useToast } from "primevue/usetoast";
 
-const model_chosen = ref('');
-
 const $primevue = usePrimeVue();
 const toast = useToast();
 
+const model_chosen = ref('');
+const confidence = ref(70);
+const files = ref([]);
+const detections = ref([]); // Store API results
+
 const totalSize = ref(0);
 const totalSizePercent = ref(0);
-const files = ref([]);
+
+const formatSize = (bytes) => {
+    const k = 1024;
+    const dm = 3;
+    const sizes = $primevue.config.locale.fileSizeTypes;
+
+    if (bytes === 0) return `0 ${sizes[0]}`;
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${(bytes / Math.pow(k, i)).toFixed(dm)} ${sizes[i]}`;
+};
+
+const onSelectedFiles = (event) => {
+    files.value = event.files;
+    totalSize.value = files.value.reduce((sum, file) => sum + file.size, 0);
+    totalSizePercent.value = totalSize.value / 10;
+};
 
 const onRemoveTemplatingFile = (file, removeFileCallback, index) => {
     removeFileCallback(index);
-    totalSize.value -= parseInt(formatSize(file.size));
+    totalSize.value -= file.size;
     totalSizePercent.value = totalSize.value / 10;
 };
 
@@ -24,40 +42,46 @@ const onClearTemplatingUpload = (clear) => {
     totalSizePercent.value = 0;
 };
 
-const onSelectedFiles = (event) => {
-    files.value = event.files;
-    files.value.forEach((file) => {
-        totalSize.value += parseInt(formatSize(file.size));
-    });
-};
-
-const uploadEvent = (callback) => {
-    totalSizePercent.value = totalSize.value / 10;
-    callback();
+const uploadEvent = async (callback) => {
+    await handleImageUploads();
+    callback(); // Update UI
 };
 
 const onTemplatedUpload = () => {
-    toast.add({ severity: "info", summary: "Success", detail: "File Uploaded", life: 3000 });
+    toast.add({ severity: "success", summary: "Uploaded", detail: "Files successfully uploaded", life: 3000 });
 };
 
-const formatSize = (bytes) => {
-    const k = 1024;
-    const dm = 3;
-    const sizes = $primevue.config.locale.fileSizeTypes;
+/** 🧠 API upload logic */
+const handleImageUploads = async () => {
+    console.log("Uploading images...");
+    detections.value = []; // Clear previous
+    if (!files.value.length) return;
 
-    if (bytes === 0) {
-        return `0 ${sizes[0]}`;
-    }
+    const promises = files.value.map(async (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("confidence", (confidence.value / 100).toFixed(2));
+        formData.append("model", model_chosen.value); // Optional, backend must support it
 
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
+        try {
+            const response = await fetch("https://lung-cancer-detection-api.onrender.com/detect/", {
+                method: "POST",
+                body: formData
+            });
 
-    return `${formattedSize} ${sizes[i]}`;
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+            const result = await response.json();
+            detections.value.push({ filename: file.name, result });
+            console.log(`✅ ${file.name}:`, result);
+        } catch (error) {
+            console.error(`❌ Error with ${file.name}:`, error);
+            toast.add({ severity: "error", summary: "Upload Failed", detail: `${file.name} failed`, life: 3000 });
+        }
+    });
+
+    await Promise.all(promises); // Wait for all uploads
 };
-
-
-const confidence = ref(70);
-
 </script>
 
 <template>
@@ -155,6 +179,14 @@ const confidence = ref(70);
             <!-- Scan Button -->
             <div class="flex justify-center pb-10">
                 <Button label="Scan" class="p-2 w-32"/>
+            </div>
+            <div v-if="detections.length" class="pb-10">
+                <h3 class="text-xl text-surface-700 pb-2">Detection Results:</h3>
+                <ul class="text-surface-600 list-disc list-inside">
+                    <li v-for="(detection, index) in detections" :key="index">
+                        <strong>{{ detection.filename }}</strong>: {{ JSON.stringify(detection.result) }}
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
