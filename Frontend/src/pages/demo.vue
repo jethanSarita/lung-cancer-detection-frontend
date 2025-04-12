@@ -77,7 +77,7 @@ const confidence = ref(70);
             <!-- Upload Dialog -->
             <div class="card w-full pt-5 pb-5">
                 <Toast />
-                <FileUpload name="demo[]" url="/api/upload" @upload="onTemplatedUpload($event)" :multiple="true" accept="image/*" :maxFileSize="1000000" @select="onSelectedFiles">
+                <FileUpload name="demo[]" url="/api/upload" @upload="onTemplatedUpload($event)" :multiple="true" accept="image/*" :maxFileSize="500000000" @select="onSelectedFiles">
                     <template #header="{ chooseCallback, uploadCallback, clearCallback, files }">
                         <div class="flex flex-wrap justify-between items-center flex-1 gap-4">
                             <div class="flex gap-2">

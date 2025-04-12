@@ -1,17 +1,15 @@
 <template>
-  <div class="relative z-0 h-screen pb-96 overflow-auto">
-    <div class="flex h-screen z-10">
+    <div class="flex h-screen">
       <div class="w-[30%] bg-rose-200">
         <PoweredByJethan />
       </div>
-      <div class="h-screen w-[70%] bg-red-100">
+      <div class="h-auto w-[70%] bg-red-100 overflow-auto">
         <router-view v-slot="{ Component }">
           <transition name="fade" mode="out-in">
             <component :is="Component" />
           </transition>
         </router-view>
       </div>
-    </div>
   </div>
   
 </template>

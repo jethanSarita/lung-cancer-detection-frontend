@@ -15,9 +15,7 @@ const path = computed(() => {
     <nav class="h-screen flex justify-center items-center">
         <ul class="items-start space-y-1 text-surface-700">
             <li>
-                <div class="text-=lg font-bold pb-2" @click="selected = !selected">
-                    LOGO
-                </div>
+                <img src="../../public/favicon.ico" alt="LOGO" class="w-5 h-auto" />
             </li>
             <li>    
                 <RouterLink :class="['text-xl', path==='/' && 'text-surface-500']" to="/">LungVision</RouterLink>
