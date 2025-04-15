@@ -14,6 +14,8 @@ const detections = ref([]); // Store API results
 const totalSize = ref(0);
 const totalSizePercent = ref(0);
 
+const isUploading = ref(false);
+
 const formatSize = (bytes) => {
     const k = 1024;
     const dm = 3;
@@ -44,7 +46,7 @@ const onClearTemplatingUpload = (clear) => {
 
 const uploadEvent = async (callback) => {
     await handleImageUploads();
-    callback(); // Update UI
+    //callback(); // Update UI
 };
 
 const onTemplatedUpload = () => {
@@ -53,34 +55,38 @@ const onTemplatedUpload = () => {
 
 /** 🧠 API upload logic */
 const handleImageUploads = async () => {
-    console.log("Uploading images...");
-    detections.value = []; // Clear previous
-    if (!files.value.length) return;
-
-    const promises = files.value.map(async (file) => {
+    isUploading.value = true;
+    detections.value = []; // Reset
+    for (const file of files.value) {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("confidence", (confidence.value / 100).toFixed(2));
-        formData.append("model", model_chosen.value); // Optional, backend must support it
+        // formData.append("model", model_chosen.value);
 
         try {
-            const response = await fetch("https://lung-cancer-detection-api.onrender.com/detect/", {
+            const response = await fetch("https://lung-cancer-detecton-backend.onrender.com/detect/", {
                 method: "POST",
-                body: formData
+                body: formData,
             });
 
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            if (!response.ok) {
+                throw new Error(`HTTP Error! Status: ${response.status}`);
+            }
 
             const result = await response.json();
-            detections.value.push({ filename: file.name, result });
-            console.log(`✅ ${file.name}:`, result);
-        } catch (error) {
-            console.error(`❌ Error with ${file.name}:`, error);
-            toast.add({ severity: "error", summary: "Upload Failed", detail: `${file.name} failed`, life: 3000 });
-        }
-    });
 
-    await Promise.all(promises); // Wait for all uploads
+            // Push response along with the original file name
+            detections.value.push({
+                // filename: file.name,
+                result: result,
+                annotatedImage: `data:image/png;base64,${result.image}`
+            });
+
+        } catch (error) {
+            console.error("Error uploading file:", error);
+        }
+    }
+    isUploading.value = false;
 };
 </script>
 
@@ -100,13 +106,11 @@ const handleImageUploads = async () => {
             <p class="text-sm text-surface-600 ">Disclaimer: This model is not perfect and may produce false positives or false negatives. Please consult a medical professional for a thorough diagnosis.</p>
             <!-- Upload Dialog -->
             <div class="card w-full pt-5 pb-5">
-                <Toast />
-                <FileUpload name="demo[]" url="/api/upload" @upload="onTemplatedUpload($event)" :multiple="true" accept="image/*" :maxFileSize="500000000" @select="onSelectedFiles">
+                <FileUpload pt:content:class="overflow-y-auto h-96" @upload="onTemplatedUpload($event)" :multiple="true" accept="image/*" :maxFileSize="500000000" @select="onSelectedFiles">
                     <template #header="{ chooseCallback, uploadCallback, clearCallback, files }">
                         <div class="flex flex-wrap justify-between items-center flex-1 gap-4">
                             <div class="flex gap-2">
-                                <Button @click="chooseCallback()" icon="pi pi-images" rounded outlined severity="secondary"></Button>
-                                <Button @click="uploadEvent(uploadCallback)" icon="pi pi-cloud-upload" rounded outlined severity="success" :disabled="!files || files.length === 0"></Button>
+                                <Button @click="chooseCallback()" icon="pi pi-cloud-upload" rounded outlined severity="success"></Button>
                                 <Button @click="clearCallback()" icon="pi pi-times" rounded outlined severity="danger" :disabled="!files || files.length === 0"></Button>
                             </div>
                             <ProgressBar :value="totalSizePercent" :showValue="false" class="md:w-20rem h-1 w-full md:ml-auto">
@@ -117,7 +121,6 @@ const handleImageUploads = async () => {
                     <template #content="{ files, uploadedFiles, removeUploadedFileCallback, removeFileCallback }">
                         <div class="flex flex-col gap-8 pt-4">
                             <div v-if="files.length > 0">
-                                <h5>Pending</h5>
                                 <div class="flex flex-wrap gap-4">
                                     <div v-for="(file, index) of files" :key="file.name + file.type + file.size" class="p-8 rounded-border flex flex-col border border-surface items-center gap-4">
                                         <div>
@@ -127,21 +130,6 @@ const handleImageUploads = async () => {
                                         <div>{{ formatSize(file.size) }}</div>
                                         <Badge value="Pending" severity="warn" />
                                         <Button icon="pi pi-times" @click="onRemoveTemplatingFile(file, removeFileCallback, index)" outlined rounded severity="danger" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div v-if="uploadedFiles.length > 0">
-                                <h5>Completed</h5>
-                                <div class="flex flex-wrap gap-4">
-                                    <div v-for="(file, index) of uploadedFiles" :key="file.name + file.type + file.size" class="p-8 rounded-border flex flex-col border border-surface items-center gap-4">
-                                        <div>
-                                            <img role="presentation" :alt="file.name" :src="file.objectURL" width="100" height="50" />
-                                        </div>
-                                        <span class="font-semibold text-ellipsis max-w-60 whitespace-nowrap overflow-hidden">{{ file.name }}</span>
-                                        <div>{{ formatSize(file.size) }}</div>
-                                        <Badge value="Completed" class="mt-4" severity="success" />
-                                        <Button icon="pi pi-times" @click="removeUploadedFileCallback(index)" outlined rounded severity="danger" />
                                     </div>
                                 </div>
                             </div>
@@ -178,15 +166,21 @@ const handleImageUploads = async () => {
             </div>
             <!-- Scan Button -->
             <div class="flex justify-center pb-10">
-                <Button label="Scan" class="p-2 w-32"/>
+                <Button @click="uploadEvent(uploadCallback)" :disabled="!files || files.length === 0" label="Scan" class="p-2 w-32"/>
             </div>
-            <div v-if="detections.length" class="pb-10">
-                <h3 class="text-xl text-surface-700 pb-2">Detection Results:</h3>
-                <ul class="text-surface-600 list-disc list-inside">
-                    <li v-for="(detection, index) in detections" :key="index">
-                        <strong>{{ detection.filename }}</strong>: {{ JSON.stringify(detection.result) }}
-                    </li>
-                </ul>
+            <p v-if="isUploading" class="text-center text-primary-500 font-medium pb-4">Processing images, please wait...</p>
+            <div v-if="detections.length > 0" class="pt-10">
+                <h3 class="text-2xl font-bold text-surface-700 pb-5">Detection Results</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div v-for="(detection, index) in detections" :key="index" class="p-4 border border-surface rounded-lg shadow-sm">
+                        <h4 class="text-lg font-semibold mb-2 text-surface-800">{{ detection.filename }}</h4>
+                        <img :src="detection.annotatedImage" alt="Detection result" class="w-full rounded border" />
+                        <div class="mt-2 text-sm text-surface-600">
+                            <p><strong>Raw Result:</strong></p>
+                            <pre class="bg-surface-100 p-2 rounded overflow-x-auto">{{ detection.result }}</pre>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
