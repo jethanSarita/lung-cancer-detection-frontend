@@ -148,24 +148,8 @@ const handleImageUploads = async () => {
                 <p class="text-xl text-surface-700 pt-5 pb-5">Confidnce Threshold <span class="text-primary-600">{{ confidence }}%</span></p>
                 <Slider v-model="confidence" class="w-full" pt:handle:class="before:bg-primary-500 bg-primary-500"/>
             </div>
-            <!-- Radio Buttons -->
-            <p class="text-xl text-surface-700 pt-5 pb-5">Choose the YOLO Model for predictions</p>
-            <div class="flex flex-col gap-4 pb-5 text-surface-700">
-                <div class="flex items-center gap-2">
-                    <RadioButton v-model="model_chosen" inputId="model_chosen1" name="model_chosen" value="YOLOv5mu (v0.0.2b)"/>
-                    <label for="model_chosen1">YOLOv5mu (v0.0.2b)</label>
-                </div>
-                <div class="flex items-center gap-2">
-                    <RadioButton v-model="model_chosen" inputId="model_chosen2" name="model_chosen" value="YOLOv5lu (v0.0.2c)" />
-                    <label for="model_chosen2">YOLOv5lu (v0.0.2c)</label>
-                </div>
-                <div class="flex items-center gap-2">
-                    <RadioButton v-model="model_chosen" inputId="model_chosen3" name="model_chosen" value="PlaceHolder" />
-                    <label for="model_chosen3">PlaceHolder</label>
-                </div>
-            </div>
             <!-- Scan Button -->
-            <div class="flex justify-center pb-10">
+            <div class="flex justify-center pt-10 pb-10">
                 <Button @click="uploadEvent(uploadCallback)" :disabled="!files || files.length === 0" label="Scan" class="p-2 w-32"/>
             </div>
             <p v-if="isUploading" class="text-center text-primary-500 font-medium pb-4">Processing images, please wait...</p>
