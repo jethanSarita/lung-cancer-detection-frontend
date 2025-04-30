@@ -3,7 +3,7 @@
       <div class="w-[30%] bg-rose-200">
         <PoweredByJethan />
       </div>
-      <div class="h-auto w-[70%] bg-red-100 overflow-auto">
+      <div class="h-auto w-[70%] bg-red-100 overflow-auto" id="main-scroll">
         <router-view v-slot="{ Component }">
           <transition name="fade" mode="out-in">
             <component :is="Component" />

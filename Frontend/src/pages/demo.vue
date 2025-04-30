@@ -1,12 +1,20 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { usePrimeVue } from 'primevue/config';
 import { useToast } from "primevue/usetoast";
+import { image } from '@primeuix/themes/aura/chip';
 
 const $primevue = usePrimeVue();
 const toast = useToast();
 
-const model_chosen = ref('');
+const selectedImage = ref(
+    { name: "All", code: "all" },
+);
+const images = ref([
+    { name: "All", code: "all" },
+]);
+const increment = ref(1);
+
 const confidence = ref(70);
 const files = ref([]);
 const detections = ref([]); // Store API results
@@ -28,6 +36,10 @@ const formatSize = (bytes) => {
 
 const onSelectedFiles = (event) => {
     files.value = event.files;
+    // images.value = event.files.map((file, index) => ({
+    //     name: file.name,
+    //     code: (index + 1).toString(),
+    // }));
     totalSize.value = files.value.reduce((sum, file) => sum + file.size, 0);
     totalSizePercent.value = totalSize.value / 10;
 };
@@ -53,7 +65,7 @@ const onTemplatedUpload = () => {
     toast.add({ severity: "success", summary: "Uploaded", detail: "Files successfully uploaded", life: 3000 });
 };
 
-/** 🧠 API upload logic */
+/* API upload logic */
 const handleImageUploads = async () => {
     isUploading.value = true;
     detections.value = []; // Reset
@@ -77,16 +89,31 @@ const handleImageUploads = async () => {
 
             // Push response along with the original file name
             detections.value.push({
-                // filename: file.name,
+                fileIndex: (increment.value).toString(),
+                filename: file.name,
                 result: result,
                 annotatedImage: `data:image/png;base64,${result.image}`
             });
+
+            images.value.push({
+                name: file.name,
+                code: (increment.value).toString(),
+            });
+
+            increment.value++;
+
+            console.log("Response:", result);
+            console.log("Detections:", detections.value);
+            console.log("Images:", images.value);
 
         } catch (error) {
             console.error("Error uploading file:", error);
         }
     }
     isUploading.value = false;
+};
+
+const handleSelectChange = (event) => {
 };
 </script>
 
@@ -106,7 +133,7 @@ const handleImageUploads = async () => {
             <p class="text-sm text-surface-600 ">Disclaimer: This model is not perfect and may produce false positives or false negatives. Please consult a medical professional for a thorough diagnosis.</p>
             <!-- Upload Dialog -->
             <div class="card w-full pt-5 pb-5">
-                <FileUpload pt:content:class="overflow-y-auto h-96" @upload="onTemplatedUpload($event)" :multiple="true" accept="image/*" :maxFileSize="500000000" @select="onSelectedFiles">
+                <FileUpload ref="fileUploadRef" pt:content:class="overflow-y-auto h-96" @upload="onTemplatedUpload($event)" :multiple="true" accept="image/*" :maxFileSize="500000000" @select="onSelectedFiles">
                     <template #header="{ chooseCallback, uploadCallback, clearCallback, files }">
                         <div class="flex flex-wrap justify-between items-center flex-1 gap-4">
                             <div class="flex gap-2">
@@ -149,19 +176,29 @@ const handleImageUploads = async () => {
                 <Slider v-model="confidence" class="w-full" pt:handle:class="before:bg-primary-500 bg-primary-500"/>
             </div>
             <!-- Scan Button -->
-            <div class="flex justify-center pt-10 pb-10">
+            <div v-if="!isUploading" class="flex justify-center pt-10 pb-10">
                 <Button @click="uploadEvent(uploadCallback)" :disabled="!files || files.length === 0" label="Scan" class="p-2 w-32"/>
             </div>
-            <p v-if="isUploading" class="text-center text-primary-500 font-medium pb-4">Processing images, please wait...</p>
-            <div v-if="detections.length > 0" class="pt-10">
+            <p v-if="isUploading" class="text-center text-primary-500 font-medium pb-10 pt-10">Processing images, please wait...</p>
+            <div v-if="detections.length > 0" >
                 <h3 class="text-2xl font-bold text-surface-700 pb-5">Detection Results</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Select class="m-5" v-model="selectedImage" :options="images" optionLabel="name" placeholder="All" v-on:change="handleSelectChange" />
+                <div v-show="selectedImage.name === 'All'" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div v-for="(detection, index) in detections" :key="index" class="p-4 border border-surface rounded-lg shadow-sm">
                         <h4 class="text-lg font-semibold mb-2 text-surface-800">{{ detection.filename }}</h4>
                         <img :src="detection.annotatedImage" alt="Detection result" class="w-full rounded border" />
                         <div class="mt-2 text-sm text-surface-600">
                             <p><strong>Raw Result:</strong></p>
                             <pre class="bg-surface-100 p-2 rounded overflow-x-auto">{{ detection.result }}</pre>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="!(selectedImage.name === 'All')" >
+                    <div class="p-4 border border-surface rounded-lg shadow-sm">
+                        <img :src="detections.find(detection => detection.fileIndex === selectedImage.code).annotatedImage" alt="Detection result" class="w-full rounded border" />
+                        <div class="mt-2 text-sm text-surface-600">
+                            <p><strong>Raw Result:</strong></p>
+                            <pre class="bg-surface-100 p-2 rounded overflow-x-auto">{{ detections.find(detection => detection.fileIndex === selectedImage.code).result }}</pre>
                         </div>
                     </div>
                 </div>

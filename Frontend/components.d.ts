@@ -18,6 +18,7 @@ declare module 'vue' {
     RadioButton: typeof import('primevue/radiobutton')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    Select: typeof import('primevue/select')['default']
     Slider: typeof import('primevue/slider')['default']
     TeamImage: typeof import('./src/components/TeamImage.vue')['default']
     Toast: typeof import('primevue/toast')['default']
