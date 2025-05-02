@@ -18,6 +18,7 @@
     {
       "src": "/(.*)",
       "dest": "Frontend/lung-cancer-frontend/dist/$1"
-    }
+    },
+    { "src": "/[^.]+","dest": "/", "status": 200 }
   ]
 }
