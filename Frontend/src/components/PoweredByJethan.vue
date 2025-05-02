@@ -19,9 +19,6 @@ const path = computed(() => {
             </li>
             <li>    
                 <RouterLink :class="['text-xl', path==='/' && 'text-surface-500']" to="/">LungVision</RouterLink>
-            </li>   
-            <li>
-                <RouterLink :class="['text-xl', path==='/demo/' && 'text-surface-500']" to="/demo/">Demo</RouterLink>
             </li>
             <li>
                 <RouterLink :class="['text-xl', path==='/research/' && 'text-surface-500']" to="/research/">Research</RouterLink>
